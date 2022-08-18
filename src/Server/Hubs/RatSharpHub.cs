@@ -2,15 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using OneOf;
+using OneOf.Types;
 
 namespace Server.Hubs;
+
 public class RatSharpHub : Hub<IRatSharpClient>
 {
   #region Overrides
-  
+
   public override async Task OnDisconnectedAsync(Exception? exception)
   {
-    UserRepository.RemoveUser(Context.ConnectionId);
+    UserRepository.RemoveIfExists(Context.ConnectionId);
     await base.OnDisconnectedAsync(exception);
   }
 
@@ -43,8 +46,10 @@ public class RatSharpHub : Hub<IRatSharpClient>
   /// <param name="userId">Id of the connected UserClient</param>
   public async Task GetUserInfo(string userId)
   {
-    string userInfo = UserRepository.GetUserInfo(userId);
-    await Clients.Caller.ReceiveGetUserResponse(userInfo);
+    OneOf<string, None> result = UserRepository.TryGetUserInfo(userId);
+    await result.Match<Task>(
+      async (userInfo) => { await Clients.Caller.ReceiveGetUserResponse(userInfo); },
+      async (_) => { await Clients.Caller.ReceiveUserNotFoundResponse(); });
   }
 
   public async Task GetAllUsersInfo()
@@ -56,10 +61,10 @@ public class RatSharpHub : Hub<IRatSharpClient>
   #endregion
 
   #region Hub methods invoked by UserClient(s)
-  
+
   public void IdentifyAsUser(string userInfo)
   {
-    UserRepository.AddUser(Context.ConnectionId, userInfo);
+    UserRepository.AddOrUpdate(Context.ConnectionId, userInfo);
   }
 
   public async Task SendExecuteCommandResponse(string commandOutput)
@@ -91,6 +96,12 @@ public interface IRatSharpClient
   /// <param name="userInfo">Detailed information of the requested UserClient</param>
   /// <returns>A Task that will be completed when the signal is sent to the AdminClient</returns>
   public Task ReceiveGetUserResponse(string userInfo);
+
+  /// <summary>
+  /// An event that will be triggered on AdminClient if the user it requested is not connected at the time of request
+  /// </summary>
+  /// <returns>A Task that will be completed when the signal is sent to the AdminClient</returns>
+  public Task ReceiveUserNotFoundResponse();
 
   /// <summary>
   /// An event that will be triggered on AdminClient when it receives the info of all connected users
