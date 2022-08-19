@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Data;
 using Microsoft.AspNetCore.SignalR;
 using OneOf;
 using OneOf.Types;
@@ -46,7 +47,7 @@ public class RatSharpHub : Hub<IRatSharpClient>
   /// <param name="userId">Id of the connected UserClient</param>
   public async Task GetUserInfo(string userId)
   {
-    OneOf<string, None> result = UserRepository.TryGetUserInfo(userId);
+    OneOf<UserInfoWithId, None> result = UserRepository.TryGetUserInfo(userId);
     await result.Match<Task>(
       async (userInfo) => { await Clients.Caller.ReceiveGetUserResponse(userInfo); },
       async (_) => { await Clients.Caller.ReceiveUserNotFoundResponse(); });
@@ -54,7 +55,7 @@ public class RatSharpHub : Hub<IRatSharpClient>
 
   public async Task GetAllUsersInfo()
   {
-    IEnumerable<string> allUsersInfo = UserRepository.GetAllUsersInfo();
+    IEnumerable<UserInfoWithId> allUsersInfo = UserRepository.GetAllUsersInfo();
     await Clients.Caller.ReceiveGetAllUsersResponse(allUsersInfo);
   }
 
@@ -62,7 +63,7 @@ public class RatSharpHub : Hub<IRatSharpClient>
 
   #region Hub methods invoked by UserClient(s)
 
-  public void IdentifyAsUser(string userInfo)
+  public void IdentifyAsUser(UserInfo userInfo)
   {
     UserRepository.AddOrUpdate(Context.ConnectionId, userInfo);
   }
@@ -95,7 +96,7 @@ public interface IRatSharpClient
   /// </summary>
   /// <param name="userInfo">Detailed information of the requested UserClient</param>
   /// <returns>A Task that will be completed when the signal is sent to the AdminClient</returns>
-  public Task ReceiveGetUserResponse(string userInfo);
+  public Task ReceiveGetUserResponse(UserInfoWithId userInfo);
 
   /// <summary>
   /// An event that will be triggered on AdminClient if the user it requested is not connected at the time of request
@@ -108,7 +109,7 @@ public interface IRatSharpClient
   /// </summary>
   /// <param name="allUsersInfo">Detailed information on all connected UserClients</param>
   /// <returns>A Task that will be completed when the signal is sent to the AdminClient</returns>
-  public Task ReceiveGetAllUsersResponse(IEnumerable<string> allUsersInfo);
+  public Task ReceiveGetAllUsersResponse(IEnumerable<UserInfoWithId> allUsersInfo);
 
   #endregion
 

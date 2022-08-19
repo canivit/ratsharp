@@ -14,5 +14,9 @@
     <ItemGroup>
       <PackageReference Include="OneOf" Version="3.0.223" />
     </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Data\Data.csproj" />
+    </ItemGroup>
     
 </Project>

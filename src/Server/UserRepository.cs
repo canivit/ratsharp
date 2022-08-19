@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
+using Data;
 using OneOf;
 using OneOf.Types;
 
@@ -8,10 +10,10 @@ namespace Server;
 
 internal static class UserRepository
 {
-  private static readonly Lazy<ConcurrentDictionary<string, string>> LazyInstance =
-    new(() => new ConcurrentDictionary<string, string>());
+  private static readonly Lazy<ConcurrentDictionary<string, UserInfo>> LazyInstance =
+    new(() => new ConcurrentDictionary<string, UserInfo>());
 
-  public static void AddOrUpdate(string userId, string userInfo)
+  public static void AddOrUpdate(string userId, UserInfo userInfo)
   {
     LazyInstance.Value.AddOrUpdate(userId, _ => userInfo, (_, _) => userInfo);
   }
@@ -21,19 +23,19 @@ internal static class UserRepository
     LazyInstance.Value.TryRemove(userId, out _);
   }
 
-  public static OneOf<string, None> TryGetUserInfo(string userId)
+  public static OneOf<UserInfoWithId, None> TryGetUserInfo(string userId)
   {
-    var userInfo = LazyInstance.Value.GetValueOrDefault(userId);
-    if (userInfo is null)
+    bool userExists = LazyInstance.Value.TryGetValue(userId, out var userInfo);
+    if (userExists)
     {
-      return new None();
+      return userInfo.ToInfoWithId(userId);
     }
 
-    return userInfo;
+    return new None();
   }
 
-  public static IEnumerable<string> GetAllUsersInfo()
+  public static IEnumerable<UserInfoWithId> GetAllUsersInfo()
   {
-    return LazyInstance.Value.Values;
+    return LazyInstance.Value.Select(pair => pair.Value.ToInfoWithId(pair.Key));
   }
 }
