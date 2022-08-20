@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Data;
 
 /// <summary>
@@ -5,12 +7,12 @@ namespace Data;
 /// </summary>
 public readonly struct UserInfoWithId
 {
-  public string UserId { get; }
-  public string LocalIp { get; }
-  public string RemoteIp { get; }
-  public string Country { get; }
-  public string OperatingSystem { get; }
-  public string Username { get; }
+  [JsonInclude] public string UserId { get; }
+  [JsonInclude] public string LocalIp { get; }
+  [JsonInclude] public string RemoteIp { get; }
+  [JsonInclude] public string Country { get; }
+  [JsonInclude] public string OperatingSystem { get; }
+  [JsonInclude] public string Username { get; }
 
   public UserInfoWithId(string userId, string localIp, string remoteIp, string country, string operatingSystem,
     string username)
