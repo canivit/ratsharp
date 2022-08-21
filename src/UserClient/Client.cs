@@ -13,19 +13,19 @@ using Data;
 
 namespace UserClient;
 
-internal sealed class UserClient : IUserClient
+internal sealed class Client : IClient
 {
   private readonly HttpClient _httpClient;
   private const string IpLocationApi = "https://ipinfo.io";
 
-  public UserClient()
+  public Client()
   {
     _httpClient = new HttpClient();
   }
 
   #region public interface
 
-  public async Task<UserInfo> GetUserInfo()
+  public async Task<UserInfo> GetUserInfoAsync()
   {
     IpLocation ipLocation = await GetRemoteIpAndCountry();
     string remoteIp = ipLocation.Ip ?? string.Empty;
@@ -36,7 +36,7 @@ internal sealed class UserClient : IUserClient
     return new UserInfo(remoteIp, country, operatingSystem, hostname, username);
   }
 
-  public async Task<string> ExecuteCommand(string command)
+  public async Task<string> ExecuteCommandAsync(string command)
   {
     List<string> cmdTokens = command.Split(Array.Empty<char>()).ToList();
     if (cmdTokens.Count == 0)
