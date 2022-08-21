@@ -1,5 +1,5 @@
 {
-  description = "othello";
+  description = "ratsharp";
 
   outputs = { self, nixpkgs }: let
     pkgs = import nixpkgs {
