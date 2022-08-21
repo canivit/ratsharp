@@ -8,11 +8,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Data\Data.csproj"/>
+        <ProjectReference Include="..\Data\Data.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="CliWrap" Version="3.4.4"/>
+        <PackageReference Include="CliWrap" Version="3.4.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Microsoft.Extensions.Http">
+        <HintPath>..\..\..\..\..\nix\store\v99y02c2nvgk2jzkzbjpnkyv81iix668-dotnet-sdk-6.0.300\packs\Microsoft.AspNetCore.App.Ref\6.0.5\ref\net6.0\Microsoft.Extensions.Http.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

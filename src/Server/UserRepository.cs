@@ -25,13 +25,13 @@ internal static class UserRepository
 
   public static OneOf<UserInfoWithId, None> TryGetUserInfo(string userId)
   {
-    bool userExists = LazyInstance.Value.TryGetValue(userId, out var userInfo);
-    if (userExists)
+    UserInfo? userInfo = LazyInstance.Value.GetValueOrDefault(userId);
+    if (userInfo == null)
     {
-      return userInfo.ToInfoWithId(userId);
+      return new None();
     }
 
-    return new None();
+    return userInfo.ToInfoWithId(userId);
   }
 
   public static IEnumerable<UserInfoWithId> GetAllUsersInfo()

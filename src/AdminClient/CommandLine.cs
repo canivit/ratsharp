@@ -9,7 +9,7 @@ namespace AdminClient;
 /// Provides an ICommandLine implementation based on System.CommandLine Nuget
 /// https://www.nuget.org/packages/System.CommandLine
 /// </summary>
-internal class CommandLine : ICommandLine
+internal sealed class CommandLine : ICommandLine
 {
   private readonly Parser _parser;
 
