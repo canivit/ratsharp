@@ -5,6 +5,8 @@
     pkgs = import nixpkgs {
       system = "x86_64-linux";
     };
+
+    libPath = pkgs.lib.strings.makeLibraryPath [ pkgs.openssl ];
   in {
     devShell.x86_64-linux = pkgs.mkShell {
       name = "othello";
@@ -12,6 +14,7 @@
         dotnet-sdk_6
       ];
       shellHook = ''
+        export LD_LIBRARY_PATH=${libPath}
       '';
     };
   };
