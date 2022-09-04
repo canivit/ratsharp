@@ -7,6 +7,15 @@
         <AssemblyName>server</AssemblyName>
         <InvariantGlobalization>true</InvariantGlobalization>
     </PropertyGroup>
+    
+    <PropertyGroup Condition="'$(Configuration)'=='Release'">
+        <DebugSymbols>False</DebugSymbols>
+        <DebugType>None</DebugType>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(Configuration)'=='Release'">
+        <Content Update="appsettings.json;appsettings.Development.json" CopyToPublishDirectory="Never" />
+    </ItemGroup>
 
     <ItemGroup>
       <Folder Include="Controllers" />
