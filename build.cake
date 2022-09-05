@@ -1,7 +1,6 @@
 var target = Argument("target", "CleanAndPublishAll");
 var configuration = Argument("configuration", "Release");
 
-var solutionDir = "./";
 var serverProjectDir = "./Server";
 var adminClientProjectDir = "./AdminClient";
 var userClientProjectDir = "./UserClient";
@@ -9,7 +8,7 @@ var publishDir = "./out";
 
 #region Helper methods
 
-public void PublishProject(string projectDir, string runtime)
+public void PublishProjectToRuntime(string projectDir, string runtime)
 {
    DotNetPublish(projectDir, new DotNetPublishSettings
    {
@@ -19,6 +18,16 @@ public void PublishProject(string projectDir, string runtime)
       SelfContained = true,
       Runtime = runtime,
       OutputDirectory = $"{publishDir}/{runtime}",
+   });
+}
+
+public void PublishProjectCrossPlatform(string projectDir)
+{
+   var projectName = System.IO.Path.GetFileName(projectDir);
+   DotNetPublish(projectDir, new DotNetPublishSettings
+   {
+      Configuration = configuration,
+      OutputDirectory = $"{publishDir}/cross-platform/{projectName}",
    });
 }
 
@@ -38,79 +47,100 @@ Task("Clean")
 
 #region Publish Server
 
+Task("PublishServerCrossPlatform")
+   .Does(() => 
+   {
+      PublishProjectCrossPlatform(serverProjectDir);
+   });
+
 Task("PublishServerToLinux")
    .Does(() => 
    {
-      PublishProject(serverProjectDir, "linux-x64");
+      PublishProjectToRuntime(serverProjectDir, "linux-x64");
    });
 
 Task("PublishServerToWindows")
    .Does(() => 
    {
-      PublishProject(serverProjectDir, "win-x64");
+      PublishProjectToRuntime(serverProjectDir, "win-x64");
    });
 
 Task("PublishServerToMacOs")
    .Does(() => 
    {
-      PublishProject(serverProjectDir, "osx-x64");
+      PublishProjectToRuntime(serverProjectDir, "osx-x64");
    });
 
 Task("PublishServer")
+   .IsDependentOn("PublishServerCrossPlatform")
    .IsDependentOn("PublishServerToLinux")
    .IsDependentOn("PublishServerToWindows")
-   .IsDependentOn("PublishServerToMacOs");
+   .IsDependentOn("PublishServerToMacOs");   
 
 #endregion
 
 #region Publish AdminClient
 
+Task("PublishAdminClientCrossPlatform")
+   .Does(() => 
+   {
+      PublishProjectCrossPlatform(adminClientProjectDir);
+   });
+
 Task("PublishAdminClientToLinux")
    .Does(() => 
    {
-      PublishProject(adminClientProjectDir, "linux-x64");
+      PublishProjectToRuntime(adminClientProjectDir, "linux-x64");
    });
 
 Task("PublishAdminClientToWindows")
    .Does(() => 
    {
-      PublishProject(adminClientProjectDir, "win-x64");
+      PublishProjectToRuntime(adminClientProjectDir, "win-x64");
    });
 
 Task("PublishAdminClientToMacOs")
    .Does(() => 
    {
-      PublishProject(adminClientProjectDir, "osx-x64");
+      PublishProjectToRuntime(adminClientProjectDir, "osx-x64");
    });
 
 Task("PublishAdminClient")
+   .IsDependentOn("PublishAdminClientCrossPlatform")
    .IsDependentOn("PublishAdminClientToLinux")
    .IsDependentOn("PublishAdminClientToWindows")
-   .IsDependentOn("PublishAdminClientToMacOs");
+   .IsDependentOn("PublishAdminClientToMacOs");   
 
 #endregion
 
 #region Publish UserClient
 
+Task("PublishUserClientCrossPlatform")
+   .Does(() => 
+   {
+      PublishProjectCrossPlatform(userClientProjectDir);
+   });
+
 Task("PublishUserClientToLinux")
    .Does(() => 
    {
-      PublishProject(userClientProjectDir, "linux-x64");
+      PublishProjectToRuntime(userClientProjectDir, "linux-x64");
    });
 
 Task("PublishUserClientToWindows")
    .Does(() => 
    {
-      PublishProject(userClientProjectDir, "win-x64");
+      PublishProjectToRuntime(userClientProjectDir, "win-x64");
    });
 
 Task("PublishUserClientToMacOs")
    .Does(() => 
    {
-      PublishProject(userClientProjectDir, "osx-x64");
+      PublishProjectToRuntime(userClientProjectDir, "osx-x64");
    });
 
 Task("PublishUserClient")
+   .IsDependentOn("PublishUserClientCrossPlatform")
    .IsDependentOn("PublishUserClientToLinux")
    .IsDependentOn("PublishUserClientToWindows")
    .IsDependentOn("PublishUserClientToMacOs");
@@ -118,6 +148,11 @@ Task("PublishUserClient")
 #endregion
 
 #region Publish All
+
+Task("PublishCrossPlatform")
+   .IsDependentOn("PublishServerCrossPlatform")
+   .IsDependentOn("PublishAdminClientCrossPlatform")
+   .IsDependentOn("PublishUserClientCrossPlatform");
 
 Task("PublishToLinux")
    .IsDependentOn("PublishServerToLinux")
@@ -135,9 +170,10 @@ Task("PublishToMacOs")
    .IsDependentOn("PublishUserClientToMacOs");
 
 Task("PublishAll")
+   .IsDependentOn("PublishCrossPlatform")
    .IsDependentOn("PublishToLinux")
    .IsDependentOn("PublishToWindows")
-   .IsDependentOn("PublishToMacOs");
+   .IsDependentOn("PublishToMacOs");   
 
 Task("CleanAndPublishAll")
    .IsDependentOn("Clean")
