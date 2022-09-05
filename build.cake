@@ -1,4 +1,4 @@
-var target = Argument("target", "PublishAll");
+var target = Argument("target", "CleanAndPublishAll");
 var configuration = Argument("configuration", "Release");
 
 var solutionDir = "./";
@@ -21,6 +21,18 @@ public void PublishProject(string projectDir, string runtime)
       OutputDirectory = $"{publishDir}/{runtime}",
    });
 }
+
+#endregion
+
+#region Clean 
+
+Task("Clean")
+   .Does(() => 
+   {
+      CleanDirectories("./**/obj");
+      CleanDirectories("./**/bin");
+      CleanDirectory("./out");
+   });
 
 #endregion
 
@@ -126,6 +138,10 @@ Task("PublishAll")
    .IsDependentOn("PublishToLinux")
    .IsDependentOn("PublishToWindows")
    .IsDependentOn("PublishToMacOs");
+
+Task("CleanAndPublishAll")
+   .IsDependentOn("Clean")
+   .IsDependentOn("PublishAll");
 
 #endregion
 
